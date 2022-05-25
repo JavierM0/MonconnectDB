@@ -1,6 +1,6 @@
 import pymongo
 
-#mongodb connection
+##mongodb connection
 connection_url="mongodb://localhost:27017/"
 client=pymongo.MongoClient(connection_url)
 
@@ -10,7 +10,7 @@ student_db=client[database_name]
 collection_name="rh"
 collection=student_db[collection_name]
 
-#mongodb read operations
+##mongodb read operations
 print('Example query: : {"empno":"7369"}')
 inp_emp = int(input('Input empno: '))
 query={"empno":inp_emp}
@@ -60,7 +60,7 @@ result=collection.find(query)
 for i in result:
     print(i)
 
-#mongodb update operations
+##mongodb update operations
 
 #mongodb update employee
 print('Example query: : {"empno":7934}')
@@ -82,11 +82,10 @@ result = collection.update_one(present_data, new_data)
 print(result.modified_count, " object modified")
 
 #mongodb update department 
-"""
 print('Example query: : {"deptno":20}')
 deptno_num = int(input('Input empno: '))
 query={"departamento.deptno":deptno_num}
-present_data = collection.find(query)
+present_data = query
 print(collection.find_one(query))
 
 new_deptno = int(input('Input deptno: '))
@@ -96,9 +95,8 @@ new_loc = input('Input loc: ').upper()
 new_data = {"$set":{"departamento.deptno":new_deptno, "departamento.dname":new_dname, "departamento.loc":new_loc}}
 result = collection.update_many(present_data, new_data)
 print(result.modified_count, " object modified")
-"""
 
-#mongodb delete operations
+##mongodb delete operations
 
 #mongodb delete one employee
 print('Example query: : {"empno":7934, "ename":"MILLER", "job":"CLERK", "sal":1300}')
