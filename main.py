@@ -1,3 +1,4 @@
+from xml.dom.minidom import Document
 import pymongo
 
 ##mongodb connection
@@ -9,6 +10,28 @@ student_db=client[database_name]
 
 collection_name="rh"
 collection=student_db[collection_name]
+
+##mongodb create operations
+#create employee
+print('Example document: : {"empno":7934, "ename":"MILLER", "job":"CLERK", "sal":1300, "departamento.deptno":10, "departamento.dname":"ACCOUNTING", "departamento.loc":"NEW YORK"}')
+new_num = int(input('Input new empno: '))
+new_ename = input('Input new ename: ').upper()
+new_job = input('Input new job: ').upper()
+new_sal = int(input('Input new sal: '))
+new_deptno = int(input('Input deptno: '))
+new_dname = input('Input dname: ').upper()
+new_loc = input('Input loc: ').upper()
+document = {
+    "empno":new_num,
+    "ename": new_ename,
+    "job": new_job,
+    "sal": new_sal,
+    "departamento.deptno": new_deptno,
+    "departamento.dname": new_dname,
+    "departamento.loc": new_loc
+}
+result = collection.insert_one(document)
+print(result)
 
 ##mongodb read operations
 print('Example query: : {"empno":"7369"}')
@@ -98,7 +121,7 @@ print(result.modified_count, " object modified")
 
 ##mongodb delete operations
 
-#mongodb delete one employee
+#mongodb delete employee
 print('Example query: : {"empno":7934, "ename":"MILLER", "job":"CLERK", "sal":1300}')
 emp_num = int(input('Input empno: '))
 emp_ename = input('Input ename: ').upper()
@@ -106,16 +129,16 @@ emp_job = input('Input job: ').upper()
 emp_sal = int(input('Input sal: '))
 query={"empno":emp_num, "ename":emp_ename, "job":emp_job, "sal":emp_sal}
 result = collection.find_one_and_delete(query)
-print(result)
+print(result, " deleted")
 
-#mongodb delete one job
+#mongodb delete job
 print('Example query: : {"job":"CLERK"}')
 emp_job = input('Input job: ').upper()
 query={"job":emp_job}
 result = collection.delete_many(query)
 print(result.deleted_count, " documents deleted")
 
-#mongodb delete one department
+#mongodb delete department
 print('Example query: : {"departamento.deptno":10, "departamento.dname":"ACCOUNTING", "departamento.loc":"NEW YORK"}')
 emp_deptno = int(input('Input deptno: '))
 emp_dname = input('Input dname: ').upper()
@@ -123,4 +146,3 @@ emp_loc = input('Input loc: ').upper()
 query={"departamento.deptno":emp_deptno, "departamento.dname":emp_dname, "departamento.loc":emp_loc}
 result = collection.delete_many(query)
 print(result.deleted_count, " documents deleted")
-
