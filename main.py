@@ -1,148 +1,109 @@
-from xml.dom.minidom import Document
+import os
 import pymongo
 
-##mongodb connection
+#mongodb connection
 connection_url="mongodb://localhost:27017/"
 client=pymongo.MongoClient(connection_url)
-
 database_name="scott"
 student_db=client[database_name]
-
 collection_name="rh"
 collection=student_db[collection_name]
 
-##mongodb create operations
-#create employee
-print('Example document: : {"empno":7934, "ename":"MILLER", "job":"CLERK", "sal":1300, "departamento.deptno":10, "departamento.dname":"ACCOUNTING", "departamento.loc":"NEW YORK"}')
-new_num = int(input('Input new empno: '))
-new_ename = input('Input new ename: ').upper()
-new_job = input('Input new job: ').upper()
-new_sal = int(input('Input new sal: '))
-new_deptno = int(input('Input deptno: '))
-new_dname = input('Input dname: ').upper()
-new_loc = input('Input loc: ').upper()
-document = {
-    "empno":new_num,
-    "ename": new_ename,
-    "job": new_job,
-    "sal": new_sal,
-    "departamento.deptno": new_deptno,
-    "departamento.dname": new_dname,
-    "departamento.loc": new_loc
-}
-result = collection.insert_one(document)
-print(result)
+#   create(7777, "ANDRES", "ANALYST", 3000, 20, "RESEARCH", "DALLAS")
+def create(empno, ename, job, sal, deptno, dname, loc):
+	doc = {
+			"empno": empno,
+			"ename": ename,
+			"job": job,
+			"sal": sal,
+			"departamento": {
+				"deptno": deptno,
+				"dname": dname,
+				"loc": loc
+				}
+			}
+	return collection.insert_one(doc)
 
-##mongodb read operations
-print('Example query: : {"empno":"7369"}')
-inp_emp = int(input('Input empno: '))
-query={"empno":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
+#   read(loc = "DALLAS")
+def read(empno = None, ename = None, job = None, sal = None, deptno = None, dname = None, loc = None):
+	query = dict()
+	if empno: query["empno"] = empno
+	if ename: query["ename"] = ename
+	if job: query["job"] = job
+	if sal: query["sal"] = sal
+	if deptno: query["departamento.deptno"] = deptno
+	if dname: query["departamento.dname"] = dname
+	if loc: query["departamento.loc"] = loc
+	return collection.find(query)
 
-print('Example query: : {"ename":"SMITH"}')
-inp_emp = input('Input ename: ').upper()
-query={"ename":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
+#   update(7777, loc = "LA", deptno = 13)
+def update(empno, ename = None, job = None, sal = None, deptno = None, dname = None, loc = None):
+	query = {
+			"empno": empno
+			}
+	doc = dict()
+	if ename: doc["$set"] = { "ename" : ename }
+	if job: doc["$set"] = { "job" : job }
+	if sal: doc["$set"] = { "sal" : sal }
+	if deptno: doc["$set"] = { "departamento.deptno" : deptno }
+	if dname: doc["$set"] = { "departamento.dname" : dname }
+	if loc: doc["$set"] = { "departamento.loc" : loc }
+	return collection.update_one(query, doc)
 
-print('Example query: : {"job":"CLERK"}')
-inp_emp = input('Input job: ').upper()
-query={"job":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
+#   delete(7777)
+def delete(empno):
+	query = {
+			"empno": empno
+			}
+	return collection.delete_one(query)
 
-print('Example query: : {"sal":"800"}')
-inp_emp = int(input('Input sal: '))
-query={"sal":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
+CRUD = "\
+  .oooooo.   ooooooooo.   ooooo     ooo oooooooooo.   \n\
+ d8P'  `Y8b  `888   `Y88. `888'     `8' `888'   `Y8b  \n\
+888           888   .d88'  888       8   888      888 \n\
+888           888ooo88P'   888       8   888      888 \n\
+888           888`88b.     888       8   888      888 \n\
+`88b    ooo   888  `88b.   `88.    .8'   888     d88' \n\
+ `Y8bood8P'  o888o  o888o    `YbodP'    o888bood8P'   \n\
+"
+while os.system("clear") == False:
+	print(CRUD)
+	x = input("command: ")[0].upper()
+	if x == "C":
+		empno = int(input("\tempno: "))
+		ename = input("\tename: ")
+		job = input("\tjob: ")
+		sal = int(input("\tsal: "))
+		deptno = int(input("\tdeptno: "))
+		dname = input("\tdname: ")
+		loc = input("\tloc: ")
+		print(create(empno, ename, job, sal, deptno, dname, loc))
+	if x == "R":
+		empno = input("\tempno: ")
+		empno = int(empno) if empno else None
+		ename = input("\tename: ")
+		job = input("\tjob: ")
+		sal = input("\tsal: ")
+		sal = int(sal) if sal else None
+		deptno = input("\tdeptno: ")
+		deptno = int(deptno) if deptno else None
+		dname = input("\tdname: ")
+		loc = input("\tloc: ")
+		for i, emp in enumerate(read(empno, ename, job, sal, deptno, dname, loc)):
+			print(i, emp)
+	if x == "U":
+		empno = int(input("\tempno: "))
+		ename = input("\tename: ")
+		job = input("\tjob: ")
+		sal = input("\tsal: ")
+		sal = int(sal) if sal else None
+		deptno = input("\tdeptno: ")
+		deptno = int(deptno) if deptno else None
+		dname = input("\tdname: ")
+		loc = input("\tloc: ")
+		print(update(empno, ename, job, sal, deptno, dname, loc))
+	if x == "D":
+		empno = int(input("\tempno: "))
+		print(delete(empno))
+	input()
 
-print('Example query: : {"departamento.deptno":20}')
-inp_emp = int(input('Input deptno: '))
-query={ "departamento.deptno":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
-
-print('Example query: : {"departamento.dname":"RESEARCH}')
-inp_emp = input('Input dname: ').upper()
-query={ "departamento.dname":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
-
-print('Example query: : {"departamento.loc":"DALLAS"}')
-inp_emp = input('Input loc: ').upper()
-query={ "departamento.loc":inp_emp}
-result=collection.find(query)
-for i in result:
-    print(i)
-
-##mongodb update operations
-
-#mongodb update employee
-print('Example query: : {"empno":7934}')
-emp_num = int(input('Input empno: '))
-query={"empno":emp_num}
-present_data = collection.find_one(query)
-print(present_data)
-
-new_num = int(input('Input new empno: '))
-new_ename = input('Input new ename: ').upper()
-new_job = input('Input new job: ').upper()
-new_sal = int(input('Input new sal: '))
-new_deptno = int(input('Input deptno: '))
-new_dname = input('Input dname: ').upper()
-new_loc = input('Input loc: ').upper()
-
-new_data = {"$set":{"empno":new_num, "ename":new_ename, "job":new_job, "sal":new_sal, "departamento.deptno":new_deptno, "departamento.dname":new_dname, "departamento.loc":new_loc}}
-result = collection.update_one(present_data, new_data)
-print(result.modified_count, " object modified")
-
-#mongodb update department 
-print('Example query: : {"deptno":20}')
-deptno_num = int(input('Input empno: '))
-query={"departamento.deptno":deptno_num}
-present_data = query
-print(collection.find_one(query))
-
-new_deptno = int(input('Input deptno: '))
-new_dname = input('Input dname: ').upper()
-new_loc = input('Input loc: ').upper()
-
-new_data = {"$set":{"departamento.deptno":new_deptno, "departamento.dname":new_dname, "departamento.loc":new_loc}}
-result = collection.update_many(present_data, new_data)
-print(result.modified_count, " object modified")
-
-##mongodb delete operations
-
-#mongodb delete employee
-print('Example query: : {"empno":7934, "ename":"MILLER", "job":"CLERK", "sal":1300}')
-emp_num = int(input('Input empno: '))
-emp_ename = input('Input ename: ').upper()
-emp_job = input('Input job: ').upper()
-emp_sal = int(input('Input sal: '))
-query={"empno":emp_num, "ename":emp_ename, "job":emp_job, "sal":emp_sal}
-result = collection.find_one_and_delete(query)
-print(result, " deleted")
-
-#mongodb delete job
-print('Example query: : {"job":"CLERK"}')
-emp_job = input('Input job: ').upper()
-query={"job":emp_job}
-result = collection.delete_many(query)
-print(result.deleted_count, " documents deleted")
-
-#mongodb delete department
-print('Example query: : {"departamento.deptno":10, "departamento.dname":"ACCOUNTING", "departamento.loc":"NEW YORK"}')
-emp_deptno = int(input('Input deptno: '))
-emp_dname = input('Input dname: ').upper()
-emp_loc = input('Input loc: ').upper()
-query={"departamento.deptno":emp_deptno, "departamento.dname":emp_dname, "departamento.loc":emp_loc}
-result = collection.delete_many(query)
-print(result.deleted_count, " documents deleted")
